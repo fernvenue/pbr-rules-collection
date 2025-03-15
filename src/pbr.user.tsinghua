@@ -1,0 +1,30 @@
+#!/bin/sh
+# shellcheck disable=SC2015,SC3003,SC3060
+
+TARGET_TABLE='inet fw4'
+TARGET_INTERFACE='wg0'
+
+_ret=1
+
+params4="101.5.0.0/16
+101.6.0.0/16
+118.229.0.0/20
+166.111.0.0/16
+183.172.0.0/15
+59.66.0.0/16"
+
+params6="2001:250:200::/48
+2001:da8:200::/48
+2402:f000::/32"
+
+for ver in 4 6; do
+    case "$ver" in
+        4) params="$params4";;
+        6) params="$params6";;
+    esac
+
+    [ -n "$params" ] && _ret=0 || continue
+
+    nftset="pbr_${TARGET_INTERFACE}_${ver}_dst_ip_user"
+    nft "add element $TARGET_TABLE $nftset { ${params//$'\n'/, } }" || _ret=1
+done
