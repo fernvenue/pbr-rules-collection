@@ -10,7 +10,7 @@ _ret=1
 
 mkdir -p "${TARGET_DL_FILE%/*}"
 
-[ -s "$TARGET_DL_FILE" ] || uclient-fetch --no-check-certificate -qO- "$TARGET_URL" > "$TARGET_DL_FILE"
+[ -s "$TARGET_DL_FILE" ] || uclient-fetch -qO- "$TARGET_URL" > "$TARGET_DL_FILE"
 [ -s "$TARGET_DL_FILE" ] || exit 1
 
 all_params=$(jq -r '.list[]' "$TARGET_DL_FILE")
