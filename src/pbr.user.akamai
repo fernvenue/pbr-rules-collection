@@ -1,0 +1,30 @@
+#!/bin/sh
+# shellcheck disable=SC2015,SC3003,SC3060
+
+TARGET_URL='https://raw.githubusercontent.com/MISP/misp-warninglists/refs/heads/main/lists/akamai/list.json'
+TARGET_DL_FILE='/var/pbr_tmp_akamai.json'
+TARGET_TABLE='inet fw4'
+TARGET_INTERFACE='wg0'
+
+_ret=1
+
+mkdir -p "${TARGET_DL_FILE%/*}"
+
+[ -s "$TARGET_DL_FILE" ] || uclient-fetch --no-check-certificate -qO- "$TARGET_URL" > "$TARGET_DL_FILE"
+[ -s "$TARGET_DL_FILE" ] || exit 1
+
+all_params=$(jq -r '.list[]' "$TARGET_DL_FILE")
+params4=$(echo "$all_params" | awk '!/:/')
+params6=$(echo "$all_params" | awk '/:/')
+
+for ver in 4 6; do
+    case "$ver" in
+        4) params="$params4";;
+        6) params="$params6";;
+    esac
+
+    [ -n "$params" ] && _ret=0 || continue
+
+    nftset="pbr_${TARGET_INTERFACE}_${ver}_dst_ip_user"
+    nft "add element $TARGET_TABLE $nftset { ${params//$'\n'/, } }" || _ret=1
+done
