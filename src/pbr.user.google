@@ -1,0 +1,32 @@
+#!/bin/sh
+# shellcheck disable=SC2015,SC3003,SC3060
+
+TARGET_URL='https://www.gstatic.com/ipranges/goog.json'
+TARGET_DL_FILE='/var/pbr_tmp_google_ip_ranges.gz'
+TARGET_TABLE='inet fw4'
+TARGET_INTERFACE='wg0'
+
+_ret=1
+
+mkdir -p "${TARGET_DL_FILE%/*}"
+
+[ -s "$TARGET_DL_FILE" ] || \
+    uclient-fetch --no-check-certificate -qO- "$TARGET_URL" | \
+    gzip > "$TARGET_DL_FILE"
+
+[ -s "$TARGET_DL_FILE" ] || return 1
+
+params4="$(zcat "$TARGET_DL_FILE" | jsonfilter -e "@.prefixes[*].ipv4Prefix")"
+params6="$(zcat "$TARGET_DL_FILE" | jsonfilter -e "@.prefixes[*].ipv6Prefix")"
+
+for ver in 4 6; do
+    case "$ver" in
+        4) params="$params4";;
+        6) params="$params6";;
+    esac
+
+    [ -n "$params" ] && _ret=0 || continue
+
+    nftset="pbr_${TARGET_INTERFACE}_${ver}_dst_ip_user"
+    nft "add element $TARGET_TABLE $nftset { ${params//$'\n'/, } }" || _ret=1
+done
