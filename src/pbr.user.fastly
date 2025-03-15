@@ -16,7 +16,9 @@ mkdir -p "${TARGET_DL_FILE%/*}"
 params4=$(jq -r '.addresses[]' "$TARGET_DL_FILE")
 params6=$(jq -r '.ipv6_addresses[]' "$TARGET_DL_FILE")
 
-for ver in 4 6; do
+[ "$(uci get pbr.config.ipv6_enabled)" = "1" ] && vers="4 6" || vers="4"
+
+for ver in $vers;do
     case "$ver" in
         4) params="$params4";;
         6) params="$params6";;

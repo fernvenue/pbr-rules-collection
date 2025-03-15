@@ -17,7 +17,9 @@ params6="2001:250:200::/48
 2001:da8:200::/48
 2402:f000::/32"
 
-for ver in 4 6; do
+[ "$(uci get pbr.config.ipv6_enabled)" = "1" ] && vers="4 6" || vers="4"
+
+for ver in $vers;do
     case "$ver" in
         4) params="$params4";;
         6) params="$params6";;
