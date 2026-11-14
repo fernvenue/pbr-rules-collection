@@ -26,10 +26,6 @@ for ver in $vers; do
     [ -n "$params" ] && _ret=0 || continue
 
     nftset="pbr_${TARGET_INTERFACE}_${ver}_dst_ip_user"
-    nft list set "$TARGET_TABLE" "$nftset" >/dev/null 2>&1 || {
-        echo "nft set $nftset does not exist; ensure pbr is started"
-        continue
-    }
 
     nft add element "$TARGET_TABLE" "$nftset" { ${params//$'\n'/, } } || _ret=1
 done
