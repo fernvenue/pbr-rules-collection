@@ -9,7 +9,7 @@ TARGET_INTERFACE="wg0"
 mkdir -p "${TARGET_DL_FILE%/*}"
 
 uclient-fetch -qO- "$TARGET_URL" | \
-    jq '{list: [.data.prefixes[].prefix]}' > "$TARGET_DL_FILE" || exit 1
+    jq '{list: [.data.prefixes[].prefix]}' > "$TARGET_DL_FILE" || return 1
 
 all_params=$(jq -r '.list[]' "$TARGET_DL_FILE")
 params4=$(echo "$all_params" | awk '!/:/')
