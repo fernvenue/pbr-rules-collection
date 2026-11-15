@@ -10,3 +10,5 @@ All configuration files are written according to the standards in the [Policy-Ba
 ## Usage
 
 Just simply download the rule file from [src](./src/), and replace the `TARGET_INTERFACE` with your specific outbound interface. You can also go check my blog: [Using PBR to Route Traffic on OpenWrt](https://blog.fernvenue.com/archives/using-pbr-to-route-traffic-on-openwrt/).
+
+Some services, such as X (Twitter) and TikTok, serve most of their traffic from CDNs rather than from their own networks. Combine their rules with the akamai, cloudflare and fastly rules for full coverage.
